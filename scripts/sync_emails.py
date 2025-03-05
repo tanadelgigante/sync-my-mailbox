@@ -66,8 +66,14 @@ def main():
         
         # Configurazione schedulazione
         schedule_config = config.get('schedule', {})
-        interval = schedule_config.get('interval', 'daily')
-        time_of_day = schedule_config.get('time', '02:00')
+        interval = schedule_config.get('interval')
+        time_of_day = schedule_config.get('time')
+
+        # Se non è configurata la schedulazione, esegui immediatamente
+        if not interval or not time_of_day:
+            logger.info("Nessuna schedulazione configurata. Esecuzione immediata.")
+            sync_email(config)
+            return
 
         # Imposta schedulazione
         if interval == 'hourly':
