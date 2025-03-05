@@ -1,0 +1,10 @@
+services:
+  syncmymailbox:
+    build: .
+    container_name: syncmymailbox
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+    environment:
+      - TZ=Europe/Rome
+    restart: always
