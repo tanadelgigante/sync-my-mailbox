@@ -19,32 +19,71 @@ SyncMyMailbox è un container Docker per la sincronizzazione automatizzata di ca
 ### Configurazione Email (config.yml)
 ```yaml
 accounts:
-  - name: "Account1"
-    source:
-      host: "imap.gmail.com"
-      port: 993
-      user: "source@gmail.com"
-      password: "your_password"
-      ssl: true
+  # Configurazione Gmail
+  - source:
+      host: imap.gmail.com
+      username: email1@gmail.com
+      password: app_password_gmail
     destination:
-      host: "outlook.office365.com"
-      port: 993
-      user: "dest@outlook.com"
-      password: "your_password"
-      ssl: true
+      host: localhost
+      username: local_user1
+      password: local_password
     options:
-      delete: false
-      subfolder: "Archive"
-      exclude: ["Spam", "Trash"]
+      ssl1: true        # Usa SSL per la connessione sorgente
+      ssl2: true        # Usa SSL per la connessione destinazione
+      useheader: "Message-ID"  # Identificatore univoco per email Gmail
+      skiptomsg: 0      # Inizia dalla prima email
+      nosyncacls: true  # Non sincronizzare gli ACL
+      syncinternaldates: true  # Sincronizza le date interne
+      skipsize: true    # Salta il controllo dimensioni
+      nofoldersizes: true  # Non recuperare le dimensioni delle cartelle
+      allowsizemismatch: true  # Permetti differenze di dimensione
+
+  # Configurazione Outlook/Office365
+  - source:
+      host: outlook.office365.com
+      username: email2@outlook.com
+      password: app_password_outlook
+    destination:
+      host: localhost
+      username: local_user2
+      password: local_password
+    options:
+      ssl1: true        # Usa SSL per la connessione sorgente
+      ssl2: true        # Usa SSL per la connessione destinazione
+      automap: true     # Mappa automaticamente le cartelle
+      skipsize: true    # Salta il controllo dimensioni
+      useheader: "Message-ID"  # Identificatore univoco
+      syncinternaldates: true  # Sincronizza le date interne
+      nofoldersizes: true  # Non recuperare le dimensioni delle cartelle
+      allowsizemismatch: true  # Permetti differenze di dimensione
+
+  # Esempio configurazione per Dovecot (server IMAP generico)
+  - source:
+      host: mail.example.com
+      username: email3@example.com
+      password: password3
+    destination:
+      host: localhost
+      username: local_user3
+      password: local_password
+    options:
+      port1: 993        # Porta IMAP (default 143)
+      port2: 143        # Porta IMAP locale
+      ssl1: true        # Usa SSL per la connessione sorgente
+      tls2: true        # Usa TLS per la connessione destinazione
+      subfolder2: "Backup"  # Metti le email in una sottocartella
+      exclude: "Trash|Spam"  # Escludi queste cartelle
+      maxsize: 50000000  # Dimensione massima email (50MB)
+      maxage: 3650      # Massima età email in giorni (10 anni)
 ```
 
 ### Configurazione Schedule (schedule.yml)
 ```yaml
-schedules:
-  - name: "Account1"
-    frequency: "daily"
-    time: "02:00"
-    days: ["monday", "wednesday", "friday"]
+schedule:
+  interval: custom  # Opzioni: hourly, daily, weekly, custom
+  minutes: 180      # Ogni 3 ore (solo se interval è 'custom')
+  time: '02:00'     # Ora di sincronizzazione (per daily e weekly)
 ```
 
 ## Avvio
