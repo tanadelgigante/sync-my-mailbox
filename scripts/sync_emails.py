@@ -44,17 +44,23 @@ def sync_email(config):
                 '--password1', account['source']['password'],
                 '--host2', account['destination']['host'],
                 '--user2', dest_user,
-                '--password2', account['destination']['password'],
-                '--nolog'  # Disabilita il log interno di imapsync poiché gestiremo l'output manualmente
+                '--password2', account['destination']['password']
             ]
 
             # Aggiungi opzioni aggiuntive
             additional_options = account.get('options', {})
             for option, value in additional_options.items():
-                cmd.extend([f'--{option}', str(value)])
+                # Per valori booleani, passa solo l'opzione
+                if isinstance(value, bool) and value:
+                    cmd.append(f'--{option}')
+                # Per valori numerici o stringhe, passa l'opzione e il valore come stringa
+                elif not isinstance(value, bool):
+                    cmd.append(f'--{option}')
+                    cmd.append(str(value))
 
-            # Esecuzione sincronizzazione con tee per salvare l'output
+            # Esecuzione sincronizzazione
             logger.info(f"Sincronizzazione account: {source_user}")
+            logger.debug(f"Comando eseguito: {' '.join(cmd)}")
             
             # Apri il file di log per imapsync
             with open(log_filename, 'w') as log_file:

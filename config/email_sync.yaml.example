@@ -14,12 +14,12 @@ accounts:
       username: local_user1
       password: local_password
     options:
-      ssl1: 1
-      ssl2: 1
-      delete2duplicates: 1
-      folder: 'INBOX'
-      useheader: 'Message-ID'
-      skipsize: 1
+      ssl1: true
+      ssl2: true
+      delete2duplicates: true
+      folder: "INBOX"
+      useheader: "Message-ID"
+      skipsize: true
 
   - source:
       host: outlook.office365.com
@@ -30,8 +30,8 @@ accounts:
       username: local_user2
       password: local_password
     options:
-      ssl1: 1
-      ssl2: 1
-      delete2duplicates: 1
-      automap: 1
-      skipsize: 1
+      ssl1: true
+      ssl2: true
+      delete2duplicates: true
+      automap: true
+      skipsize: true
