@@ -5,6 +5,7 @@ import logging
 import schedule
 import time
 import subprocess
+import shlex
 from datetime import datetime
 
 # Configurazione logging
@@ -37,33 +38,43 @@ def sync_email(config):
             log_filename = f"/app/logs/imapsync_{source_user.replace('@', '_')}_{timestamp}.log"
             
             # Costruzione comando imapsync
-            cmd = [
-                'imapsync',
-                '--host1', account['source']['host'],
-                '--user1', source_user,
-                '--password1', account['source']['password'],
-                '--host2', account['destination']['host'],
-                '--user2', dest_user,
-                '--password2', account['destination']['password']
-            ]
-
+            cmd = ['imapsync']
+            
+            # Parametri di base
+            cmd.extend(['--host1', account['source']['host']])
+            cmd.extend(['--user1', source_user])
+            cmd.extend(['--password1', account['source']['password']])
+            cmd.extend(['--host2', account['destination']['host']])
+            cmd.extend(['--user2', dest_user])
+            cmd.extend(['--password2', account['destination']['password']])
+            
             # Aggiungi opzioni aggiuntive
             additional_options = account.get('options', {})
             for option, value in additional_options.items():
-                # Per valori booleani, passa solo l'opzione
-                if isinstance(value, bool) and value:
+                if value is True:
+                    # Flag booleano
                     cmd.append(f'--{option}')
-                # Per valori numerici o stringhe, passa l'opzione e il valore come stringa
-                elif not isinstance(value, bool):
-                    cmd.append(f'--{option}')
-                    cmd.append(str(value))
-
+                elif value is not False:  # Ignora i valori False
+                    # Parametro con valore
+                    cmd.extend([f'--{option}', str(value)])
+            
+            # Crea una versione della stringa di comando per il log (mascherando le password)
+            safe_cmd = cmd.copy()
+            for i, param in enumerate(safe_cmd):
+                if i > 0 and safe_cmd[i-1] in ['--password1', '--password2']:
+                    safe_cmd[i] = '********'
+            
+            log_cmd_str = ' '.join(safe_cmd)
+            logger.info(f"Esecuzione comando: {log_cmd_str}")
+            
             # Esecuzione sincronizzazione
             logger.info(f"Sincronizzazione account: {source_user}")
-            logger.debug(f"Comando eseguito: {' '.join(cmd)}")
             
             # Apri il file di log per imapsync
             with open(log_filename, 'w') as log_file:
+                # Scrivi comando nel file di log
+                log_file.write(f"Comando eseguito: {log_cmd_str}\n\n")
+                
                 # Esegui il processo
                 process = subprocess.Popen(
                     cmd,
