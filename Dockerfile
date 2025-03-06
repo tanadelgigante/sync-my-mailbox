@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install -y \
     perl \
     python3 \
     python3-pip \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Scarica imapsync direttamente da GitHub
